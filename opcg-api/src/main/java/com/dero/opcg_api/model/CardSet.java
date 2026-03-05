@@ -1,5 +1,6 @@
 package com.dero.opcg_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -14,6 +15,7 @@ public class CardSet {
 
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "cardSet", cascade = CascadeType.ALL)
     private List<Card> cards;
 }

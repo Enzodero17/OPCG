@@ -1,5 +1,6 @@
 package com.dero.opcg_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -32,6 +33,7 @@ public class Card {
     @JoinColumn(name = "set_id", nullable = false)
     private CardSet cardSet;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL)
     private List<CardVariant> variants;
 }
