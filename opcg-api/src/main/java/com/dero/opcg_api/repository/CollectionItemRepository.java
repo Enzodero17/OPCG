@@ -9,4 +9,5 @@ import java.util.UUID;
 @Repository
 public interface CollectionItemRepository extends JpaRepository<CollectionItem, Long> {
     List<CollectionItem> findByUserId(UUID userId);
+    CollectionItem findByUserIdAndCardVariantId(UUID userId, String variantId);
 }
