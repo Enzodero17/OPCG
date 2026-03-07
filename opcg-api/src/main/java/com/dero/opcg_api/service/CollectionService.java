@@ -3,6 +3,7 @@ package com.dero.opcg_api.service;
 import com.dero.opcg_api.model.CardVariant;
 import com.dero.opcg_api.model.CollectionItem;
 import com.dero.opcg_api.model.User;
+import com.dero.opcg_api.repository.CardRepository;
 import com.dero.opcg_api.repository.CollectionItemRepository;
 import com.dero.opcg_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class CollectionService {
 
     private final CollectionItemRepository collectionRepo;
     private final UserRepository userRepo;
+    private final MissionService missionService;
 
     @Transactional
     public void addCardsToUserCollection(UUID userId, List<CardVariant> pulledCards) {
@@ -76,6 +78,8 @@ public class CollectionService {
             // S'il n'en a qu'une seule, on supprime carrément la ligne de la base de données
             collectionRepo.delete(item);
         }
+
+        missionService.processAction(userId, "SELL_CARD", 1);
 
         return "Carte vendue pour " + sellPrice + " pièces ! Ton nouveau solde est de " + user.getCoins() + " pièces.";
     }
