@@ -16,4 +16,7 @@ public interface CardVariantRepository extends JpaRepository<CardVariant, String
 
     @Query("SELECT cv FROM CardVariant cv WHERE cv.card.cardSet.id = :setId ORDER BY cv.id ASC")
     List<CardVariant> findAllBySetId(String setId);
+
+    @Query("SELECT COUNT(cv) FROM CardVariant cv WHERE cv.card.cardSet.id = :setId")
+    long countBySetId(String setId);
 }
