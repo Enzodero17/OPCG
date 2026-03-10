@@ -1,11 +1,15 @@
 package com.dero.opcg_api.controller;
 
+import com.dero.opcg_api.dto.AuthResponseDto;
 import com.dero.opcg_api.dto.LoginDto;
 import com.dero.opcg_api.dto.RegisterDto;
 import com.dero.opcg_api.model.User;
 import com.dero.opcg_api.repository.UserRepository;
+import com.dero.opcg_api.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,8 +22,9 @@ public class AuthController {
 
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
-    // L'INSCRIPTION
     @PostMapping("/register")
     public User register(@RequestBody RegisterDto dto) {
 
@@ -42,20 +47,20 @@ public class AuthController {
         return userRepo.save(newUser);
     }
 
-    // LA CONNEXION
     @PostMapping("/login")
-    public User login(@RequestBody LoginDto dto) {
+    public AuthResponseDto login(@RequestBody LoginDto dto) {
+        // On demande à Spring Security de vérifier les identifiants
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
+        );
 
-        // On cherche l'utilisateur par son email
+        // Si on arrive ici, c'est que l'email et le mot de passe sont bons !
         User user = userRepo.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // On vérifie que le mot de passe tapé correspond au hachage dans la base de données
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect !");
-        }
+        // La machine fabrique le badge crypté
+        String jwtToken = jwtService.generateToken(user.getEmail());
 
-        // Si tout est bon, on renvoie les infos de l'utilisateur
-        return user;
-    }
+        // On l'envoie dans notre belle boîte DTO
+        return new AuthResponseDto(jwtToken, user.getId().toString(), user.getUsername());}
 }
