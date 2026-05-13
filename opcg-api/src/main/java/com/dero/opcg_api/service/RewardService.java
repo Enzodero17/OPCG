@@ -1,5 +1,6 @@
 package com.dero.opcg_api.service;
 
+import com.dero.opcg_api.dto.RewardResponseDto;
 import com.dero.opcg_api.model.User;
 import com.dero.opcg_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class RewardService {
     private final UserRepository userRepo;
     private final int DAILY_REWARD_AMOUNT = 1000;
 
-    public String claimDailyReward(UUID userId) {
+    public RewardResponseDto claimDailyReward(UUID userId) {
 
         // On cherche le joueur
         User user = userRepo.findById(userId)
@@ -32,7 +33,7 @@ public class RewardService {
                     "Tu as déjà récupéré ta récompense aujourd'hui ! Reviens demain à partir de minuit.");
         }
 
-        // Si tout est bon, on paie le joueur
+        // On paie le joueur
         user.setCoins(user.getCoins() + DAILY_REWARD_AMOUNT);
 
         // On met à jour son "chronomètre" avec l'heure exacte actuelle
@@ -40,6 +41,7 @@ public class RewardService {
 
         userRepo.save(user);
 
-        return "Félicitations ! Tu as reçu " + DAILY_REWARD_AMOUNT + " pièces. Ton nouveau solde est de " + user.getCoins() + " pièces.";
+        String message = "Félicitations ! Tu as reçu " + DAILY_REWARD_AMOUNT + " pièces.";
+        return new RewardResponseDto(message, user.getCoins());
     }
 }
