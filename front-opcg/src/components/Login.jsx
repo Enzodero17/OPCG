@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import api from '../api/axiosConfig';
 
-function Login() {
+function Login({ setUsername, setCoins }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState(''); // Message de succès ou d'erreur
@@ -19,10 +19,18 @@ function Login() {
             // Si Java dit "OK 200"
             const token = response.data.token;
             const userId = response.data.userId;
+            const loggedUsername = response.data.username;
+            const userCoins = response.data.coins;
 
             // On sauvegarde dans la mémoire du navigateur
             localStorage.setItem('jwt_token', token);
             localStorage.setItem('user_id', userId);
+            localStorage.setItem('username', loggedUsername);
+            localStorage.setItem('coins', userCoins);
+
+            // On met à jour le header
+            setUsername(loggedUsername);
+            setCoins(userCoins);
 
             setMessage('Connexion réussie ! Badge récupéré.');
 

@@ -54,13 +54,14 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
         );
 
-        // Si on arrive ici, c'est que l'email et le mot de passe sont bons !
+        // Si on arrive ici, c'est que l'email et le mot de passe sont bons
         User user = userRepo.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         // La machine fabrique le badge crypté
         String jwtToken = jwtService.generateToken(user.getEmail());
 
-        // On l'envoie dans notre belle boîte DTO
-        return new AuthResponseDto(jwtToken, user.getId().toString(), user.getUsername());}
+        // On l'envoie le DTO
+        return new AuthResponseDto(jwtToken, user.getId().toString(), user.getPseudo(), user.getCoins());
+    }
 }

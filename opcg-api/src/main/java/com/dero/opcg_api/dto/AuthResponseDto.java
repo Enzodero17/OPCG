@@ -9,4 +9,5 @@ public class AuthResponseDto {
     private String token;
     private String userId;
     private String username;
+    private int coins;
 }
