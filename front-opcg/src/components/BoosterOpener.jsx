@@ -85,13 +85,47 @@ function BoosterOpener({ setCoins }) {
         setSelectedBooster(null);
     };
 
+    // Récompense journalière
+    const claimDailyReward = async () => {
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return;
+
+        try {
+            const response = await api.post(`/rewards/daily/${userId}`);
+
+            const exactBalance = response.data.newBalance;
+            const successMessage = response.data.message;
+
+            setMessage(`${successMessage}`);
+
+            setCoins(exactBalance);
+            localStorage.setItem('coins', exactBalance);
+
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || error.response?.data || 'Erreur lors de la récupération.';
+            setMessage(`${errorMessage}`);
+        }
+    };
+
     return (
         <div style={{ padding: '20px', textAlign: 'center', minHeight: '600px', position: 'relative' }}>
 
             {view === 'shop' && (
                 <>
                     <h2>Boutique de Boosters</h2>
-                    {message && <p style={{ color: '#e74c3c', fontWeight: 'bold' }}>{message}</p>}
+
+                    {/* Bouton de récompense */}
+                    <div style={{ margin: '20px auto', padding: '15px', backgroundColor: '#34495e', borderRadius: '10px', maxWidth: '400px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
+                        <h3 style={{ margin: '0 0 10px 0', color: '#f1c40f' }}>Prime Journalière</h3>
+                        <button
+                            onClick={claimDailyReward}
+                            style={{ padding: '10px 20px', fontSize: '16px', backgroundColor: '#f39c12', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                            💰 Récupérer mes pièces
+                        </button>
+                    </div>
+
+                    {message && <p style={{ color: '#ecf0f1', fontWeight: 'bold', fontSize: '16px', backgroundColor: '#e74c3c', padding: '10px', borderRadius: '5px', display: 'inline-block' }}>{message}</p>}
 
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginTop: '40px' }}>
                         {availableBoosters.map((booster) => (
