@@ -7,6 +7,78 @@ const availableBoosters = [
         name: 'Romance Dawn',
         price: 500,
         image: '/op-01.png'
+    },
+    {
+        id: 'OP-02',
+        name: 'Paramount War',
+        price: 500,
+        image: '/op-02.png'
+    },
+    {
+        id: 'OP-03',
+        name: 'Pillars of Strength',
+        price: 500,
+        image: '/op-03.png'
+    },
+    {
+        id: 'OP-04',
+        name: 'Kingdoms of Intrigue',
+        price: 500,
+        image: '/op-04.png'
+    },
+    {
+        id: 'OP-05',
+        name: 'Awakening of the New Era',
+        price: 500,
+        image: '/op-05.png'
+    },
+    {
+        id: 'OP-06',
+        name: 'Wings of the Captain',
+        price: 500,
+        image: '/op-06.png'
+    },
+    {
+        id: 'OP-07',
+        name: '500 Years in the Future',
+        price: 500,
+        image: '/op-07.png'
+    },
+    {
+        id: 'OP-08',
+        name: 'Two Legends',
+        price: 500,
+        image: '/op-08.png'
+    },
+    {
+        id: 'OP-09',
+        name: 'Emperors in the New World \n',
+        price: 500,
+        image: '/op-09.png'
+    },
+    {
+        id: 'OP-10',
+        name: 'Royal Blood',
+        price: 500,
+        image: '/op-10.png'
+    },
+    {
+        id: 'OP-11',
+        name: 'A Fist of Divine Speed \n',
+        price: 500,
+        image: '/op-11.png'
+    },
+    {
+        id: 'OP-12',
+        name: 'Legacy of the Master \n',
+        price: 500,
+        image: '/op-12.png'
+    },
+    {
+        id: 'OP-13',
+        name: 'Carrying on his Will',
+        price: 500,
+        image: '/op-13.png'
     }
 ];
 
@@ -127,7 +199,7 @@ function BoosterOpener({ setCoins }) {
 
                     {message && <p style={{ color: '#ecf0f1', fontWeight: 'bold', fontSize: '16px', backgroundColor: '#e74c3c', padding: '10px', borderRadius: '5px', display: 'inline-block' }}>{message}</p>}
 
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginTop: '40px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '30px', marginTop: '40px' }}>
                         {availableBoosters.map((booster) => (
                             <div
                                 key={booster.id}

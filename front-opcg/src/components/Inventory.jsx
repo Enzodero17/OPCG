@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
+import CardModal from './CardModal';
 
 const availableSets = [
-    {
-        id: 'OP-01',
-        name: 'Romance Dawn',
-        image: '/op-01.png'
-    }
+    { id: 'OP-01', name: 'Romance Dawn', image: '/op-01.png' },
+    { id: 'OP-02', name: 'Paramount War', image: '/op-02.png' },
+    { id: 'OP-03', name: 'Pillars of Strength', image: '/op-03.png' },
+    { id: 'OP-04', name: 'Kingdoms of Intrigue', image: '/op-04.png' },
+    { id: 'OP-05', name: 'Awakening of the New Era', image: '/op-05.png' },
+    { id: 'OP-06', name: 'Wings of the Captain', image: '/op-06.png' },
+    { id: 'OP-07', name: '500 Years in the Future', image: '/op-07.png' },
+    { id: 'OP-08', name: 'Two Legends', image: '/op-08.png' },
+    { id: 'OP-09', name: 'The New Emperor', image: '/op-09.png' },
+    { id: 'OP-10', name: 'Royal Blood', image: '/op-10.png' },
+    { id: 'OP-11', name: 'Set OP-11', image: '/op-11.png' },
+    { id: 'OP-12', name: 'Set OP-12', image: '/op-12.png' },
+    { id: 'OP-13', name: 'Set OP-13', image: '/op-13.png' }
 ];
 
 function Inventory() {
@@ -14,6 +23,7 @@ function Inventory() {
     const [pokedex, setPokedex] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [selectedCard, setSelectedCard] = useState(null);
 
     useEffect(() => {
         if (selectedSet) {
@@ -35,7 +45,9 @@ function Inventory() {
                     cardNumber: variantData?.id || variantData?.cardNumber || (index + 1),
                     imageUrl: variantData?.imageUrl,
                     isOwned: item.isOwned !== undefined ? item.isOwned : item.owned,
-                    quantity: item.quantity || 0
+                    quantity: item.quantity || 0,
+                    fullCard: variantData?.card,
+                    fullVariant: variantData
                 };
             });
 
@@ -60,8 +72,7 @@ function Inventory() {
             <div style={{ padding: '20px', textAlign: 'center', minHeight: '600px' }}>
                 <h2>Choisis une extension à consulter</h2>
 
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginTop: '40px' }}>
-                    {availableSets.map((set) => (
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '30px', marginTop: '40px' }}>                    {availableSets.map((set) => (
                         <div
                             key={set.id}
                             onClick={() => setSelectedSet(set)}
@@ -124,21 +135,23 @@ function Inventory() {
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginTop: '30px' }}>
                 {pokedex.map((card, index) => (
-                    <div key={index} style={{
-                        width: '160px',
-                        height: '224px',
-                        backgroundColor: card.isOwned ? '#2c3e50' : '#1a2026',
-                        border: card.isOwned ? 'none' : '2px dashed #34495e',
-                        borderRadius: '10px',
-                        position: 'relative',
-                        boxShadow: card.isOwned ? '0 4px 8px rgba(0,0,0,0.5)' : 'none',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        opacity: card.isOwned ? 1 : 0.6,
-                        transition: 'transform 0.2s'
-                    }}
+                    <div key={index}
+                         onClick={() => { if(card.isOwned) setSelectedCard(card); }}
+                         style={{
+                            width: '160px',
+                            height: '224px',
+                            backgroundColor: card.isOwned ? '#2c3e50' : '#1a2026',
+                            border: card.isOwned ? 'none' : '2px dashed #34495e',
+                            borderRadius: '10px',
+                            position: 'relative',
+                            boxShadow: card.isOwned ? '0 4px 8px rgba(0,0,0,0.5)' : 'none',
+                            overflow: 'hidden',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            opacity: card.isOwned ? 1 : 0.6,
+                            transition: 'transform 0.2s'
+                        }}
                          onMouseEnter={(e) => { if(card.isOwned) e.currentTarget.style.transform = 'scale(1.05)' }}
                          onMouseLeave={(e) => { if(card.isOwned) e.currentTarget.style.transform = 'scale(1)' }}
                     >
@@ -167,6 +180,14 @@ function Inventory() {
                     </div>
                 ))}
             </div>
+
+            {selectedCard && (
+                <CardModal
+                    card={selectedCard.fullCard}
+                    variant={selectedCard.fullVariant}
+                    onClose={() => setSelectedCard(null)}
+                />
+            )}
         </div>
     );
 }
