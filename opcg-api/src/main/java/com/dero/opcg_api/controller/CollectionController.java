@@ -1,6 +1,8 @@
 package com.dero.opcg_api.controller;
 
 import com.dero.opcg_api.dto.CollectionStatsDto;
+import com.dero.opcg_api.dto.RewardResponseDto;
+import com.dero.opcg_api.dto.SellRequestDto;
 import com.dero.opcg_api.model.CollectionItem;
 import com.dero.opcg_api.repository.CardVariantRepository;
 import com.dero.opcg_api.repository.CollectionItemRepository;
@@ -29,6 +31,11 @@ public class CollectionController {
     @GetMapping("/{userId}/sell/{variantId}")
     public String sellCard(@PathVariable UUID userId, @PathVariable String variantId) {
         return collectionService.sellCard(userId, variantId);
+    }
+
+    @PostMapping("/sell/{userId}")
+    public RewardResponseDto sellCards(@PathVariable UUID userId, @RequestBody List<SellRequestDto> itemsToSell) {
+        return collectionService.sellDuplicateCard(userId, itemsToSell);
     }
 
     @GetMapping("/{userId}/stats/{setId}")

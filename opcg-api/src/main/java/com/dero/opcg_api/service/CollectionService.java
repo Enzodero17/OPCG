@@ -1,5 +1,7 @@
 package com.dero.opcg_api.service;
 
+import com.dero.opcg_api.dto.RewardResponseDto;
+import com.dero.opcg_api.dto.SellRequestDto;
 import com.dero.opcg_api.model.CardVariant;
 import com.dero.opcg_api.model.CollectionItem;
 import com.dero.opcg_api.model.User;
@@ -55,7 +57,7 @@ public class CollectionService {
         // On cherche la carte précise dans l'inventaire du joueur
         CollectionItem item = collectionRepo.findByUserIdAndCardVariantId(userId, variantId);
 
-        // Sécurité : On vérifie qu'il possède bien la carte
+        // On vérifie qu'il possède bien la carte
         if (item == null || item.getQuantity() <= 0) {
             throw new RuntimeException("Tu ne possèdes pas cette carte ou tu l'as déjà vendue !");
         }
@@ -84,12 +86,54 @@ public class CollectionService {
         return "Carte vendue pour " + sellPrice + " pièces ! Ton nouveau solde est de " + user.getCoins() + " pièces.";
     }
 
+    @Transactional
+    public RewardResponseDto sellDuplicateCard(UUID userId, List<SellRequestDto> itemsToSell) {
+
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable !"));
+
+        int totalCoinsEarned = 0;
+        int totalCardsSold = 0;
+
+        // Parcours du panier
+        for (SellRequestDto requestDto : itemsToSell) {
+
+            CollectionItem item = collectionRepo.findByUserIdAndCardVariantId(userId, requestDto.getVariantId());
+
+            if (item == null) {
+                throw new RuntimeException("Tu ne possèdes pas cette carte " + requestDto.getVariantId());
+            }
+
+            int remainingQuantity = item.getQuantity() - requestDto.getQuantityToSell();
+            if (remainingQuantity < 1) {
+                throw new RuntimeException("Tu dois garder au moins 1 exemplaire de la carte " + requestDto.getVariantId());
+            }
+
+            int sellPrice = calculateSellPrice(item.getCardVariant());
+            int earnings = sellPrice * requestDto.getQuantityToSell();
+
+            item.setQuantity(remainingQuantity);
+            collectionRepo.save(item);
+
+            totalCardsSold += requestDto.getQuantityToSell();
+            totalCoinsEarned += earnings;
+        }
+
+        // On paie le joueur
+        user.setCoins(user.getCoins() + totalCoinsEarned);
+        userRepo.save(user);
+
+        missionService.processAction(userId, "SELL_CARD", totalCardsSold);
+
+        String message = "Vente réussie ! " + totalCardsSold + " doublons vendus pour " + totalCoinsEarned + " pièces.";
+        return new RewardResponseDto(message, user.getCoins());
+    }
+
     private int calculateSellPrice(CardVariant variant) {
         int basePrice = 0;
 
         // On lit la rareté sur la carte d'origine
         switch (variant.getCard().getRarity()) {
-            case "C": basePrice = 5; break;
             case "UC": basePrice = 10; break;
             case "R": basePrice = 50; break;
             case "L": basePrice = 100; break;
