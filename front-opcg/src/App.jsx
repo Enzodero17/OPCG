@@ -45,7 +45,7 @@ function App() {
 
                     {/* 4. On affiche le bon composant selon le bouton cliqué ! */}
                     {currentView === 'shop' && <BoosterOpener setCoins={setCoins} />}
-                    {currentView === 'inventory' && <Inventory />}
+                    {currentView === 'inventory' && <Inventory setCoins={setCoins} />}
                 </>
             )}
         </div>
