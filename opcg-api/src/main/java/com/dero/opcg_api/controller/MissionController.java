@@ -1,5 +1,6 @@
 package com.dero.opcg_api.controller;
 
+import com.dero.opcg_api.dto.RewardResponseDto;
 import com.dero.opcg_api.model.User;
 import com.dero.opcg_api.model.UserMission;
 import com.dero.opcg_api.repository.UserMissionRepository;
@@ -29,17 +30,17 @@ public class MissionController {
 
     // Réclamer la récompense d'une mission terminée
     @PostMapping("/{userId}/claim/{missionId}")
-    public String claimReward(@PathVariable UUID userId, @PathVariable Long missionId) {
+    public RewardResponseDto claimReward(@PathVariable UUID userId, @PathVariable Long missionId) {
 
         UserMission userMission = userMissionRepo.findByUserIdAndMissionId(userId, missionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mission introuvable."));
 
         if (!userMission.isCompleted()) {
-            return "Tricheur ! Cette mission n'est pas encore terminée.";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette mission n'est pas encore terminée.");
         }
 
         if (userMission.isClaimed()) {
-            return "Tu as déjà récupéré cette récompense.";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tu as déjà récupéré cette récompense.");
         }
 
         // On paie le joueur
@@ -52,6 +53,6 @@ public class MissionController {
         userMission.setClaimed(true);
         userMissionRepo.save(userMission);
 
-        return "Bravo ! Tu as gagné " + reward + " pièces. Ton nouveau solde est de " + user.getCoins() + " pièces.";
+        return new RewardResponseDto("Bravo ! Tu as gagné " + reward + " pièces.", user.getCoins());
     }
 }
