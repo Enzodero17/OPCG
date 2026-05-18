@@ -1,7 +1,18 @@
 import React from 'react';
+import api from "../api/axiosConfig.js";
 
 function CardModal({ card, variant, onClose }) {
     if (!card) return null;
+
+    const handleSetFavorite = async () => {
+        const userId = localStorage.getItem('user_id');
+        try {
+            await api.post(`/collection/${userId}/favorite/${variant.id}`);
+            alert("Cette variante a été définie comme ta carte préférée !");
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     return (
         <div style={{
@@ -17,18 +28,15 @@ function CardModal({ card, variant, onClose }) {
                 overflow: 'hidden', border: '2px solid #f1c40f', position: 'relative'
             }} onClick={(e) => e.stopPropagation()}>
 
-                {/* Bouton de fermeture */}
                 <button onClick={onClose} style={{
                     position: 'absolute', top: '15px', right: '15px', background: 'none',
                     border: 'none', color: '#bdc3c7', fontSize: '24px', cursor: 'pointer'
                 }}>✖</button>
 
-                {/* GAUCHE : L'IMAGE */}
                 <div style={{ flex: '1', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
                     <img src={variant?.imageUrl} alt={card.name} style={{ maxHeight: '100%', maxWidth: '100%', borderRadius: '10px', boxShadow: '0 0 20px rgba(0,0,0,0.5)' }} />
                 </div>
 
-                {/* DROITE : LES INFOS (Stats de ta base Java) */}
                 <div style={{ flex: '1.2', padding: '40px', overflowY: 'auto', textAlign: 'left' }}>
                     <h2 style={{ color: '#f1c40f', marginBottom: '5px', fontSize: '28px' }}>{card.name}</h2>
                     <p style={{ color: '#bdc3c7', fontStyle: 'italic', marginBottom: '20px' }}>{card.id} • {card.rarity}</p>
@@ -50,6 +58,13 @@ function CardModal({ card, variant, onClose }) {
                             <span style={{ color: '#f1c40f', display: 'block', fontSize: '12px' }}>ATTRIBUT</span>
                             <span style={{ fontSize: '16px' }}>{card.attribute || '-'}</span>
                         </div>
+
+                        <button
+                            onClick={handleSetFavorite}
+                            style={{ marginTop: '25px', width: '100%', padding: '12px', backgroundColor: '#f1c40f', color: '#1c2630', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px' }}
+                        >
+                            ⭐ Définir comme carte préférée
+                        </button>
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
