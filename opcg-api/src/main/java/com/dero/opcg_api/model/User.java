@@ -32,9 +32,14 @@ public class User implements UserDetails {
 
     private LocalDateTime lastDailyReward;
 
+    @Column(columnDefinition = "integer default 0")
+    private int totalBoostersOpened = 0;
+
+    private String favoriteVariantId;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(); // On ne gère pas de rôles complexes (Admin/Joueur) pour l'instant
+        return List.of();
     }
 
     @Override

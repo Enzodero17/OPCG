@@ -26,9 +26,8 @@ public class BoosterService {
         List<CardVariant> superRares = variantRepo.findStandardByRarity(setId, "SR");
         List<CardVariant> secretRares = variantRepo.findStandardByRarity(setId, "SEC");
         List<CardVariant> leaders = variantRepo.findStandardByRarity(setId, "L");
-        List<CardVariant> hits = variantRepo.findHits(setId); // Les Parallels/Mangas
+        List<CardVariant> hits = variantRepo.findHits(setId);
 
-        // Si la base n'est pas encore remplie, on évite de faire planter le code
         if (commons.isEmpty() || uncommons.isEmpty()) {
             throw new RuntimeException("L'extension " + setId + " ne contient pas assez de cartes.");
         }
@@ -44,7 +43,7 @@ public class BoosterService {
         }
 
         // Slot 11 : Le slot Rare ou supérieur (70% Rare, 25% Super Rare, 5% Secret Rare)
-        int rareRoll = random.nextInt(100); // Tire un nombre entre 0 et 99
+        int rareRoll = random.nextInt(100);
         if (rareRoll < 70) {
             booster.add(getRandomCard(rares));
         } else if (rareRoll < 95) {
@@ -61,12 +60,15 @@ public class BoosterService {
             booster.add(getRandomCard(hits.isEmpty() ? leaders : hits));
         }
 
+
+
         return booster;
     }
 
-    // Petite méthode utilitaire pour piocher une carte au hasard dans une liste
     private CardVariant getRandomCard(List<CardVariant> pool) {
-        if (pool == null || pool.isEmpty()) return null;
+        if (pool == null || pool.isEmpty()) {
+            return null;
+        }
         int randomIndex = random.nextInt(pool.size());
         return pool.get(randomIndex);
     }

@@ -36,16 +36,16 @@ public class BoosterController {
 
         // On vérifie s'il a assez de pièces
         if (user.getCoins() < BOOSTER_PRICE) {
-            // S'il est trop pauvre, on bloque tout et on renvoie une erreur au site web !
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Fonds insuffisants. Il te faut " + BOOSTER_PRICE + " pièces, mais tu n'en as que " + user.getCoins() + ".");
         }
 
         // On lui retire ses 500 pièces et on sauvegarde son nouveau solde
         user.setCoins(user.getCoins() - BOOSTER_PRICE);
+        user.setTotalBoostersOpened(user.getTotalBoostersOpened() + 1);
         userRepository.save(user);
 
-        // L'algorithme tire les 12 cartes
+        // On tire les 12 cartes
         List<CardVariant> booster = boosterService.openEnglishBooster(setId);
 
         // On enregistre ces 12 cartes dans l'inventaire du joueur
@@ -53,7 +53,6 @@ public class BoosterController {
 
         missionService.processAction(userId, "OPEN_BOOSTER", 1);
 
-        // On renvoie les cartes pour l'animation d'ouverture
         return booster;
     }
 }
