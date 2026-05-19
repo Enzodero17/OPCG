@@ -1,10 +1,11 @@
 import Login from "./components/Login.jsx";
-import BoosterOpener from "./components/BoosterOpener.jsx";
+import BoosterOpener from "./components/Shop/Shop.jsx";
 import {useState} from "react";
 import Header from "./components/Header/Header.jsx";
 import Inventory from "./components/Inventory.jsx";
 import Missions from "./components/Mission.jsx";
 import Profile from "./components/Profile.jsx";
+import Shop from "./components/Shop/Shop.jsx";
 
 function App() {
 
@@ -54,7 +55,7 @@ function App() {
                             Mon Profil
                         </button>
                     </div>
-                    {currentView === 'shop' && <BoosterOpener setCoins={setCoins} />}
+                    {currentView === 'shop' && <Shop setCoins={setCoins} />}
                     {currentView === 'inventory' && <Inventory setCoins={setCoins} />}
                     {currentView === 'missions' && <Missions setCoins={setCoins} />}
                     {currentView === 'profile' && <Profile />}
