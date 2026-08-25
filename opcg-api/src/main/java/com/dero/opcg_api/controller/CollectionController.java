@@ -9,6 +9,7 @@ import com.dero.opcg_api.model.User;
 import com.dero.opcg_api.repository.CardVariantRepository;
 import com.dero.opcg_api.repository.CollectionItemRepository;
 import com.dero.opcg_api.repository.UserRepository;
+import com.dero.opcg_api.security.SecurityUtils;
 import com.dero.opcg_api.service.CollectionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,31 +21,35 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/collection")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CollectionController {
 
     private final CollectionItemRepository collectionRepo;
     private final CollectionService collectionService;
     private final CardVariantRepository variantRepo;
     private final UserRepository userRepo;
+    private final SecurityUtils securityUtils;
 
     @GetMapping("/{userId}")
     public List<CollectionItem> getUserCollection(@PathVariable UUID userId) {
+        securityUtils.requireSelf(userId);
         return collectionRepo.findByUserId(userId);
     }
 
-    @GetMapping("/{userId}/sell/{variantId}")
+    @PostMapping("/{userId}/sell/{variantId}")
     public String sellCard(@PathVariable UUID userId, @PathVariable String variantId) {
+        securityUtils.requireSelf(userId);
         return collectionService.sellCard(userId, variantId);
     }
 
     @PostMapping("/sell/{userId}")
     public RewardResponseDto sellCards(@PathVariable UUID userId, @RequestBody List<SellRequestDto> itemsToSell) {
+        securityUtils.requireSelf(userId);
         return collectionService.sellDuplicateCard(userId, itemsToSell);
     }
 
     @GetMapping("/{userId}/stats/{setId}")
     public CollectionStatsDto getCollectionStats(@PathVariable UUID userId, @PathVariable String setId) {
+        securityUtils.requireSelf(userId);
 
         // On demande le total absolu au CardVariantRepository
         int totalInSet = (int) variantRepo.countBySetId(setId);
@@ -58,6 +63,8 @@ public class CollectionController {
 
     @GetMapping("/{userId}/profile-stats")
     public ProfileStatsDto getProfileStats(@PathVariable UUID userId) {
+        securityUtils.requireSelf(userId);
+
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Joueur introuvable"));
 
@@ -94,6 +101,8 @@ public class CollectionController {
 
     @PostMapping("/{userId}/favorite/{variantId}")
     public ResponseEntity<String> updateFavoriteCard(@PathVariable UUID userId, @PathVariable String variantId) {
+        securityUtils.requireSelf(userId);
+
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Joueur introuvable"));
 

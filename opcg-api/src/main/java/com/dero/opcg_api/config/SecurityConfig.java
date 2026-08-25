@@ -32,9 +32,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // On laisse public l'inscription, la connexion, le Pokédex et la création des missions de base
-                        .requestMatchers("/api/auth/**", "/api/library/**", "/api/admin/**").permitAll()
-                        // TOUT le reste (boosters, inventaire, récompenses) exige de présenter un badge !
+                        // On laisse public l'inscription et la connexion
+                        .requestMatchers("/api/auth/**").permitAll()
+                        // Le catalogue de cartes d'une extension (sans données de joueur) reste public
+                        .requestMatchers(HttpMethod.GET, "/api/library/sets/*").permitAll()
+                        // Les routes d'admin exigent désormais le rôle ADMIN, pas juste un badge valide
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // Tout le reste (boosters, inventaire, récompenses, collection d'un joueur précis)
+                        // exige de présenter un badge valide !
                         .anyRequest().authenticated()
                 )
                 // On dit au serveur de ne rien mémoriser : on fait confiance uniquement au badge

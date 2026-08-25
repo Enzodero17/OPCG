@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
-        // Si pas de badge, ou s'il ne commence pas par "Bearer " (Porteur), on le laisse passer
+        // Si pas de badge, ou s'il ne commence pas par "Bearer " (Porteur), on le laisse passer.
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -41,25 +41,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // On découpe le texte pour ne garder que le code secret (on enlève les 7 lettres de "Bearer ")
         jwt = authHeader.substring(7);
 
-        // On demande à notre machine de lire l'email caché dans le badge
-        userEmail = jwtService.extractEmail(jwt);
+        try {
+            // On demande à notre machine de lire l'email caché dans le badge
+            userEmail = jwtService.extractEmail(jwt);
 
-        // Si on a trouvé un email et que le joueur n'est pas encore connecté dans ce cycle...
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // Si on a trouvé un email et que le joueur n'est pas encore connecté dans ce cycle...
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            // On va chercher le joueur dans la base de données
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                // On va chercher le joueur dans la base de données
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-            // On vérifie si le badge est toujours valide et correspond bien au joueur
-            if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
+                // On vérifie si le badge est toujours valide et correspond bien au joueur
+                if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
 
-                // Si oui, on lui donne l'autorisation officielle d'entrer !
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    // Si oui, on lui donne l'autorisation officielle d'entrer !
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
         }
 
         // On passe à la suite (le contrôleur qui va donner les boosters ou les stats)
