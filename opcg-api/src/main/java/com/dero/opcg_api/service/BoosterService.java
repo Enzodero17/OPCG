@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 @Service
@@ -49,7 +50,9 @@ public class BoosterService {
         } else if (rareRoll < 95) {
             booster.add(getRandomCard(superRares));
         } else {
-            booster.add(getRandomCard(secretRares.isEmpty() ? superRares : secretRares));
+            List<CardVariant> secOrFallback = !secretRares.isEmpty() ? superRares
+                    : (!superRares.isEmpty() ? superRares : rares);
+            booster.add(getRandomCard(secOrFallback));
         }
 
         // Slot 12 : Le slot Leader ou Hit (80% Leader, 20% Hit/Parallel)
@@ -60,7 +63,7 @@ public class BoosterService {
             booster.add(getRandomCard(hits.isEmpty() ? leaders : hits));
         }
 
-
+        booster.removeIf(Objects::isNull);
 
         return booster;
     }

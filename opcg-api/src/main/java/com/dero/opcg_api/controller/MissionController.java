@@ -5,6 +5,7 @@ import com.dero.opcg_api.model.User;
 import com.dero.opcg_api.model.UserMission;
 import com.dero.opcg_api.repository.UserMissionRepository;
 import com.dero.opcg_api.repository.UserRepository;
+import com.dero.opcg_api.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -16,21 +17,23 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/missions")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class MissionController {
 
     private final UserMissionRepository userMissionRepo;
     private final UserRepository userRepo;
+    private final SecurityUtils securityUtils;
 
     // Afficher le journal de quêtes du joueur
     @GetMapping("/{userId}")
     public List<UserMission> getUserMissions(@PathVariable UUID userId) {
+        securityUtils.requireSelf(userId);
         return userMissionRepo.findByUserId(userId);
     }
 
     // Réclamer la récompense d'une mission terminée
     @PostMapping("/{userId}/claim/{missionId}")
     public RewardResponseDto claimReward(@PathVariable UUID userId, @PathVariable Long missionId) {
+        securityUtils.requireSelf(userId);
 
         UserMission userMission = userMissionRepo.findByUserIdAndMissionId(userId, missionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mission introuvable."));

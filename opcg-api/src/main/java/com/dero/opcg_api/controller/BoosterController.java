@@ -3,6 +3,7 @@ package com.dero.opcg_api.controller;
 import com.dero.opcg_api.model.CardVariant;
 import com.dero.opcg_api.model.User;
 import com.dero.opcg_api.repository.UserRepository;
+import com.dero.opcg_api.security.SecurityUtils;
 import com.dero.opcg_api.service.BoosterService;
 import com.dero.opcg_api.service.CollectionService;
 import com.dero.opcg_api.service.MissionService;
@@ -17,18 +18,19 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/boosters")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class BoosterController {
 
     private final BoosterService boosterService;
     private final CollectionService collectionService;
     private final UserRepository userRepository;
     private final MissionService missionService;
+    private final SecurityUtils securityUtils;
 
     private final int BOOSTER_PRICE = 500;
 
     @GetMapping("/open/{setId}/{userId}")
     public List<CardVariant> openBoosterAndSave(@PathVariable String setId, @PathVariable UUID userId) {
+        securityUtils.requireSelf(userId);
 
         // On cherche le joueur dans la base de données
         User user = userRepository.findById(userId)

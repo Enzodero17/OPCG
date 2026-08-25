@@ -5,6 +5,7 @@ import com.dero.opcg_api.model.CardVariant;
 import com.dero.opcg_api.model.CollectionItem;
 import com.dero.opcg_api.repository.CardVariantRepository;
 import com.dero.opcg_api.repository.CollectionItemRepository;
+import com.dero.opcg_api.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +17,11 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/library")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class LibraryController {
 
     private final CardVariantRepository variantRepo;
     private final CollectionItemRepository collectionRepo;
+    private final SecurityUtils securityUtils;
 
     @GetMapping("/sets/{setId}")
     public List<CardVariant> getSetLibrary(@PathVariable String setId) {
@@ -29,6 +30,7 @@ public class LibraryController {
 
     @GetMapping("/sets/{setId}/user/{userId}")
     public List<LibraryItemDto> getSetLibraryForUser(@PathVariable String setId, @PathVariable UUID userId) {
+        securityUtils.requireSelf(userId);
 
         // On récupère TOUTES les cartes de l'extension Romance Dawn
         List<CardVariant> allVariantsInSet = variantRepo.findAllBySetId(setId);
@@ -36,9 +38,7 @@ public class LibraryController {
         // On récupère l'inventaire complet du joueur
         List<CollectionItem> userInventory = collectionRepo.findByUserId(userId);
 
-        // OPTIMISATION MAGIQUE : On transforme l'inventaire en "Dictionnaire" (Map).
-        // La clé = L'ID de la carte (ex: OP01-001) | La valeur = La quantité possédée (ex: 3)
-        // Cela évite de faire des boucles dans des boucles qui ralentiraient le serveur !
+        // La clé = L'ID de la carte (ex : OP01-001) | La valeur = La quantité possédée (ex : 3)
         Map<String, Integer> ownedCardsMap = userInventory.stream()
                 .collect(Collectors.toMap(
                         item -> item.getCardVariant().getId(),
