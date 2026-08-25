@@ -17,7 +17,7 @@ import java.util.UUID;
 public class RewardService {
 
     private final UserRepository userRepo;
-    private final int DAILY_REWARD_AMOUNT = 1000;
+    private static final int DAILY_REWARD_AMOUNT = 1000;
 
     public RewardResponseDto claimDailyReward(UUID userId) {
 

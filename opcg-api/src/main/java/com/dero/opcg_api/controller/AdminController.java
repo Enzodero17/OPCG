@@ -5,6 +5,7 @@ import com.dero.opcg_api.model.User;
 import com.dero.opcg_api.repository.MissionRepository;
 import com.dero.opcg_api.repository.UserRepository;
 import com.dero.opcg_api.service.CardSyncService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +19,7 @@ public class AdminController {
     private final CardSyncService syncService;
     private final UserRepository userRepo;
     private final MissionRepository missionRepo;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/sync")
     public String triggerSync() {
@@ -29,7 +31,7 @@ public class AdminController {
         User testUser = new User();
         testUser.setUsername("MugiwaraTest");
         testUser.setEmail("luffy@test.com");
-        testUser.setPasswordHash("motdepasse_temporaire");
+        testUser.setPasswordHash(passwordEncoder.encode("motdepasse_temporaire"));
         testUser.setCoins(5000);
 
         return userRepo.save(testUser);

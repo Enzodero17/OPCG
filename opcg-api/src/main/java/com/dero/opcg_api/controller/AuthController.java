@@ -6,9 +6,11 @@ import com.dero.opcg_api.dto.RegisterDto;
 import com.dero.opcg_api.model.User;
 import com.dero.opcg_api.repository.UserRepository;
 import com.dero.opcg_api.security.JwtService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -48,11 +50,15 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponseDto login(@RequestBody LoginDto dto) {
-        // On demande à Spring Security de vérifier les identifiants
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
-        );
+    public AuthResponseDto login(@Valid @RequestBody LoginDto dto) {
+        try {
+            // On demande à Spring Security de vérifier les identifiants
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
+            );
+        } catch (BadCredentialsException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email ou mot de passe incorrect");
+        }
 
         // Si on arrive ici, c'est que l'email et le mot de passe sont bons
         User user = userRepo.findByEmail(dto.getEmail())
