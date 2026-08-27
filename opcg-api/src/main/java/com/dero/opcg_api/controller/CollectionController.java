@@ -12,8 +12,10 @@ import com.dero.opcg_api.repository.UserRepository;
 import com.dero.opcg_api.security.SecurityUtils;
 import com.dero.opcg_api.service.CollectionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -102,6 +104,10 @@ public class CollectionController {
     @PostMapping("/{userId}/favorite/{variantId}")
     public ResponseEntity<String> updateFavoriteCard(@PathVariable UUID userId, @PathVariable String variantId) {
         securityUtils.requireSelf(userId);
+
+        if (!variantRepo.existsById(variantId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cette carte n'existe pas.");
+        }
 
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Joueur introuvable"));

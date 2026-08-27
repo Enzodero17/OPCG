@@ -98,6 +98,10 @@ public class CollectionService {
         // Parcours du panier
         for (SellRequestDto requestDto : itemsToSell) {
 
+            if (requestDto.getQuantityToSell() <= 0) {
+                throw new RuntimeException("La quantité à vendre doit être positive pour la carte " + requestDto.getVariantId());
+            }
+
             CollectionItem item = collectionRepo.findByUserIdAndCardVariantId(userId, requestDto.getVariantId());
 
             if (item == null) {
