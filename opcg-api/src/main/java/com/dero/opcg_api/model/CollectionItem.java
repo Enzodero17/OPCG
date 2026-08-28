@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "collection_items")
+@Table(name = "collection_items", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "card_variant_id"}))
 @Data
 public class CollectionItem {
 
@@ -24,4 +24,7 @@ public class CollectionItem {
 
     @Column(nullable = false)
     private Integer quantity = 1;
+
+    @Version
+    private Long version;
 }

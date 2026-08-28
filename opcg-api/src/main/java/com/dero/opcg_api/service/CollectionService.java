@@ -9,6 +9,7 @@ import com.dero.opcg_api.repository.CardRepository;
 import com.dero.opcg_api.repository.CollectionItemRepository;
 import com.dero.opcg_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +48,31 @@ public class CollectionService {
                 newItem.setCardVariant(card);
                 newItem.setQuantity(1);
                 collectionRepo.save(newItem);
+            }
+        }
+    }
+
+    private void addOrIncrementCard(User user, CardVariant card) {
+        CollectionItem existingItem = collectionRepo.findByUserIdAndCardVariantId(user.getId(), card.getId());
+
+        if (existingItem != null) {
+            existingItem.setQuantity(existingItem.getQuantity() + 1);
+            collectionRepo.save(existingItem);
+            return;
+        }
+
+        try {
+            CollectionItem newItem = new CollectionItem();
+            newItem.setUser(user);
+            newItem.setCardVariant(card);
+            newItem.setQuantity(1);
+            collectionRepo.saveAndFlush(newItem);
+        } catch (DataIntegrityViolationException e) {
+            CollectionItem concurrentItem = collectionRepo.findByUserIdAndCardVariantId(user.getId(), card.getId());
+
+            if (concurrentItem != null) {
+                concurrentItem.setQuantity(concurrentItem.getQuantity() + 1);
+                collectionRepo.save(concurrentItem);
             }
         }
     }

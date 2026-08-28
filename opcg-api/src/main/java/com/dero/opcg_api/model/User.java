@@ -35,6 +35,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+    @Version
+    private Long version;
+
     private Integer coins = 0;
 
     private LocalDateTime lastDailyReward;
