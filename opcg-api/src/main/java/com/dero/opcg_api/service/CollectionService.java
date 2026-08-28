@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,28 +33,18 @@ public class CollectionService {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable !"));
 
+        // On charge l'inventaire du joueur
+        Map<String, CollectionItem> existentItemsByVariantId = collectionRepo.findByUserId(userId).stream()
+                .collect(Collectors.toMap(item -> item.getCardVariant().getId(),
+                        item -> item, (a, b) -> a));
+
         // On parcourt les 12 cartes qu'il vient de tirer
         for (CardVariant card : pulledCards) {
-
-            // On regarde s'il possède DÉJÀ cette carte exacte dans son inventaire
-            CollectionItem existingItem = collectionRepo.findByUserIdAndCardVariantId(userId, card.getId());
-
-            if (existingItem != null) {
-                // S'il l'a déjà, on augmente juste la quantité de +1
-                existingItem.setQuantity(existingItem.getQuantity() + 1);
-                collectionRepo.save(existingItem);
-            } else {
-                // S'il ne l'a pas, on crée une nouvelle ligne dans son inventaire
-                CollectionItem newItem = new CollectionItem();
-                newItem.setUser(user);
-                newItem.setCardVariant(card);
-                newItem.setQuantity(1);
-                collectionRepo.save(newItem);
-            }
+            addOrIncrementCard(user, card, existentItemsByVariantId);
         }
     }
 
-    private void addOrIncrementCard(User user, CardVariant card) {
+    private void addOrIncrementCard(User user, CardVariant card, Map<String, CollectionItem> existingItemsByVariantId) {
         CollectionItem existingItem = collectionRepo.findByUserIdAndCardVariantId(user.getId(), card.getId());
 
         if (existingItem != null) {
@@ -67,12 +59,14 @@ public class CollectionService {
             newItem.setCardVariant(card);
             newItem.setQuantity(1);
             collectionRepo.saveAndFlush(newItem);
+            existingItemsByVariantId.put(card.getId(), newItem);
         } catch (DataIntegrityViolationException e) {
             CollectionItem concurrentItem = collectionRepo.findByUserIdAndCardVariantId(user.getId(), card.getId());
 
             if (concurrentItem != null) {
                 concurrentItem.setQuantity(concurrentItem.getQuantity() + 1);
                 collectionRepo.save(concurrentItem);
+                existingItemsByVariantId.put(card.getId(), concurrentItem);
             }
         }
     }

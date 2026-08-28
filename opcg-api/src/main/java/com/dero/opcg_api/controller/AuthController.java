@@ -6,6 +6,7 @@ import com.dero.opcg_api.dto.RegisterDto;
 import com.dero.opcg_api.model.User;
 import com.dero.opcg_api.repository.UserRepository;
 import com.dero.opcg_api.security.JwtService;
+import com.dero.opcg_api.security.LoginAttemptService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final LoginAttemptService loginAttemptService;
 
     @PostMapping("/register")
     public User register(@RequestBody RegisterDto dto) {
@@ -51,14 +53,23 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthResponseDto login(@Valid @RequestBody LoginDto dto) {
+
+        if (loginAttemptService.isLocked(dto.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+                    "Trop de tentatives échouées. Réessaie dans quelques minutes.");
+        }
+
         try {
             // On demande à Spring Security de vérifier les identifiants
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
             );
         } catch (BadCredentialsException e) {
+            loginAttemptService.loginFailed(dto.getEmail());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email ou mot de passe incorrect");
         }
+
+        loginAttemptService.loginSucceeded(dto.getEmail());
 
         // Si on arrive ici, c'est que l'email et le mot de passe sont bons
         User user = userRepo.findByEmail(dto.getEmail())

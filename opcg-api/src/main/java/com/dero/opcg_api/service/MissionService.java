@@ -7,11 +7,13 @@ import com.dero.opcg_api.repository.MissionRepository;
 import com.dero.opcg_api.repository.UserMissionRepository;
 import com.dero.opcg_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MissionService {
@@ -47,7 +49,7 @@ public class MissionService {
                 if (userMission.getCurrentAmount() >= mission.getTargetAmount()) {
                     userMission.setCurrentAmount(mission.getTargetAmount());
                     userMission.setCompleted(true);
-                    System.out.println("🎉 Mission accomplie pour " + user.getUsername() + " : " + mission.getTitle());
+                    log.info("Mission accomplie pour {} : {}", user.getUsername(), mission.getTitle());
                 }
 
                 // On sauvegarde sa progression
