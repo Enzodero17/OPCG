@@ -7,6 +7,7 @@ import com.dero.opcg_api.security.SecurityUtils;
 import com.dero.opcg_api.service.BoosterService;
 import com.dero.opcg_api.service.CollectionService;
 import com.dero.opcg_api.service.MissionService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,7 @@ public class BoosterController {
 
     private final int BOOSTER_PRICE = 500;
 
+    @Transactional
     @GetMapping("/open/{setId}/{userId}")
     public List<CardVariant> openBoosterAndSave(@PathVariable String setId, @PathVariable UUID userId) {
         securityUtils.requireSelf(userId);
@@ -42,13 +44,13 @@ public class BoosterController {
                     "Fonds insuffisants. Il te faut " + BOOSTER_PRICE + " pièces, mais tu n'en as que " + user.getCoins() + ".");
         }
 
+        // On tire les 12 cartes
+        List<CardVariant> booster = boosterService.openEnglishBooster(setId);
+
         // On lui retire ses 500 pièces et on sauvegarde son nouveau solde
         user.setCoins(user.getCoins() - BOOSTER_PRICE);
         user.setTotalBoostersOpened(user.getTotalBoostersOpened() + 1);
         userRepository.save(user);
-
-        // On tire les 12 cartes
-        List<CardVariant> booster = boosterService.openEnglishBooster(setId);
 
         // On enregistre ces 12 cartes dans l'inventaire du joueur
         collectionService.addCardsToUserCollection(userId, booster);

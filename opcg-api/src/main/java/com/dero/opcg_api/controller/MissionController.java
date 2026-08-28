@@ -6,6 +6,7 @@ import com.dero.opcg_api.model.UserMission;
 import com.dero.opcg_api.repository.UserMissionRepository;
 import com.dero.opcg_api.repository.UserRepository;
 import com.dero.opcg_api.security.SecurityUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,7 @@ public class MissionController {
     }
 
     // Réclamer la récompense d'une mission terminée
+    @Transactional
     @PostMapping("/{userId}/claim/{missionId}")
     public RewardResponseDto claimReward(@PathVariable UUID userId, @PathVariable Long missionId) {
         securityUtils.requireSelf(userId);
