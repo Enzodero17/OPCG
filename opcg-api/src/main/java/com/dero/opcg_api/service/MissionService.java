@@ -57,4 +57,7 @@ public class MissionService {
             }
         }
     }
+
+    public void updatePeakProgress(UUID userId, String loginStreak, Object currentLoginStreak) {
+    }
 }

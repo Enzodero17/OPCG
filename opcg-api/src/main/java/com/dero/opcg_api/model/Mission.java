@@ -19,4 +19,12 @@ public class Mission {
     private String actionType;
 
     private int targetAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MissionCategory category = MissionCategory.PERMANENT;
+
+    private int tier = 1;
+
+    private String badgeIcon;
 }
