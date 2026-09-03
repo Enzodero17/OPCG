@@ -7,6 +7,7 @@ import com.dero.opcg_api.model.User;
 import com.dero.opcg_api.repository.UserRepository;
 import com.dero.opcg_api.security.JwtService;
 import com.dero.opcg_api.security.LoginAttemptService;
+import com.dero.opcg_api.service.StreakService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final LoginAttemptService loginAttemptService;
+    private final StreakService streakService;
 
     @PostMapping("/register")
     public User register(@RequestBody RegisterDto dto) {
@@ -74,6 +76,8 @@ public class AuthController {
         // Si on arrive ici, c'est que l'email et le mot de passe sont bons
         User user = userRepo.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        streakService.recordLogin(user.getId());
 
         // La machine fabrique le badge crypté
         String jwtToken = jwtService.generateToken(user.getEmail());

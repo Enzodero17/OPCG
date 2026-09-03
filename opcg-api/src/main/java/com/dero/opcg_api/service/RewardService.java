@@ -19,6 +19,7 @@ import java.util.UUID;
 public class RewardService {
 
     private final UserRepository userRepo;
+    private final MissionService missionService;
     private static final int DAILY_REWARD_AMOUNT = 1000;
     private static final ZoneOffset REWARD_ZONE = ZoneOffset.UTC;
 
@@ -44,6 +45,8 @@ public class RewardService {
         user.setLastDailyReward(LocalDateTime.now(REWARD_ZONE));
 
         userRepo.save(user);
+
+        missionService.processAction(userId, "CLAIM_DAILY_REWARD", 1);
 
         String message = "Félicitations ! Tu as reçu " + DAILY_REWARD_AMOUNT + " pièces.";
         return new RewardResponseDto(message, user.getCoins());

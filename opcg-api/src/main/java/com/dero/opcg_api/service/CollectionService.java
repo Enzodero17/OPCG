@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,10 +39,26 @@ public class CollectionService {
                 .collect(Collectors.toMap(item -> item.getCardVariant().getId(),
                         item -> item, (a, b) -> a));
 
+        Set<String> raritiesOwnedBefore = existentItemsByVariantId.values().stream()
+                .map(item -> item.getCardVariant().getCard().getRarity())
+                .collect(Collectors.toSet());
+
         // On parcourt les 12 cartes qu'il vient de tirer
         for (CardVariant card : pulledCards) {
             addOrIncrementCard(user, card, existentItemsByVariantId);
         }
+
+        Set<String> newRaritiesThisPull = new java.util.HashSet<>();
+
+        for (CardVariant card : pulledCards) {
+            String rarity = card.getCard().getRarity();
+
+            if(!raritiesOwnedBefore.contains(rarity) && newRaritiesThisPull.add(rarity)) {
+                missionService.processAction(userId, "FIRST_CARD_" + rarity, 1);
+            }
+        }
+
+        missionService.updatePeakProgress(userId, "UNIQUE_CARDS_OWNED", existentItemsByVariantId.size());
     }
 
     private void addOrIncrementCard(User user, CardVariant card, Map<String, CollectionItem> existingItemsByVariantId) {

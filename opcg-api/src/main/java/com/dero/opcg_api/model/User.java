@@ -48,6 +48,12 @@ public class User implements UserDetails {
 
     private String favoriteVariantId;
 
+    private LocalDate lastLoginDate;
+
+    private int currentLoginStreak = 0;
+
+    private int longestLoginStreak = 0;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -85,23 +91,5 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public Object getCurrentLoginStreak() {
-    }
-
-    public void setCurrentLoginStreak(int i) {
-    }
-
-    public Object getLongestLoginStreak() {
-    }
-
-    public void setLastLoginDate(LocalDate today) {
-    }
-
-    public void setLongestLoginStreak(Object currentLoginStreak) {
-    }
-
-    public LocalDate getLastLoginDate() {
     }
 }
